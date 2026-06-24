@@ -275,7 +275,7 @@ body{
 }
 """
 
-# JS لإنشاء رسم الأداء (Chart.js) — البيانات تُحقن عبر placeholder
+# JS لإنشاء رسم الأداء وجلب الأسعار اللحظية من Binance API
 _JS = """
 const NAV = __NAV_JSON__;
 if (NAV && window.Chart) {
@@ -304,6 +304,47 @@ if (NAV && window.Chart) {
         y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a4f5c',font:{size:10},
            callback:v=>'$'+Number(v).toLocaleString()}}}}});
 }
+
+// --- جلب وتحديث الأسعار اللحظية تلقائياً لجدول الـ Top 20 ---
+document.addEventListener("DOMContentLoaded", function() {
+    function formatCryptoPrice(price) {
+        if (price >= 100) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (price >= 1) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+        return price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+    }
+
+    function fetchLivePrices() {
+        const rows = document.querySelectorAll("tr[data-symbol]");
+        rows.forEach(row => {
+            const symbol = row.getAttribute("data-symbol");
+            if (!symbol) return;
+            
+            fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`)
+                .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+                .then(data => {
+                    if (data.price) {
+                        const priceCell = row.querySelector(".live-price");
+                        if (priceCell) {
+                            const numericPrice = parseFloat(data.price);
+                            priceCell.innerText = "$" + formatCryptoPrice(numericPrice);
+                            priceCell.style.color = "#00e676";
+                            priceCell.style.transition = "color 0.3s ease";
+                            setTimeout(() => { priceCell.style.color = ""; }, 400);
+                        }
+                    }
+                })
+                .catch(err => {
+                    const priceCell = row.querySelector(".live-price");
+                    if (priceCell && priceCell.innerText === "جاري التحميل...") {
+                        priceCell.innerText = "غير متوفر";
+                        priceCell.style.color = "var(--off)";
+                    }
+                });
+        });
+    }
+    fetchLivePrices();
+    setInterval(fetchLivePrices, 10000);
+});
 """
 
 
@@ -442,14 +483,17 @@ def _render_top(top: list) -> str:
             up = (rs or 0) >= 0
             arrow = "▲" if up else "▼"
             act = (t.get("action") or "hold").lower()
+            sym = html.escape(str(t.get("symbol", "")))
+            binance_symbol = f"{sym.upper()}USDT"
             rows.append(
-                f'<tr class="{hot.strip()}"><td>{rk}</td>'
-                f'<td><span class="sym">{html.escape(str(t.get("symbol","")))}</span></td>'
+                f'<tr class="{hot.strip()}" data-symbol="{binance_symbol}"><td>{rk}</td>'
+                f'<td><span class="sym">{sym}</span></td>'
                 f'<td><span class="tag">{html.escape(str(t.get("sector","") or "—"))}</span></td>'
                 f'<td class="mono {"up" if up else "down"}"><span class="arrow">{arrow}</span>{_pct(rs)}</td>'
-                f'<td><span class="pill {act}">{act}</span></td></tr>')
+                f'<td><span class="pill {act}">{act}</span></td>'
+                f'<td class="live-price mono" style="font-weight: bold; color: var(--caution);">جاري التحميل...</td></tr>')
         body = ('<table class="tbl"><thead><tr><th>#</th><th>العملة</th>'
-                '<th>القطاع</th><th>RS 90d</th><th>الحالة</th></tr></thead>'
+                '<th>القطاع</th><th>RS 90d</th><th>الحالة</th><th>السعر الحالي اللحظي</th></tr></thead>'
                 '<tbody>' + "".join(rows) + '</tbody></table>')
     return (f'<div class="card panel" style="margin-bottom:18px">'
             f'<h3>المشاريع المختارة — Top 20</h3>'
