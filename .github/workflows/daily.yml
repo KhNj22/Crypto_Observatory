@@ -1,29 +1,46 @@
-name: market-observatory-daily
+name: observatory-daily
 
 on:
   schedule:
-    - cron: "5 4 * * *"      # يعمل الساعة 04:05 بتوقيت UTC يومياً تلقائياً
-  workflow_dispatch:         # يتيح لك زر تشغيل يدوي من موقع جيتهاب عند الحاجة
+    - cron: "5 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-observatory-db
+  cancel-in-progress: false
 
 jobs:
   run:
-    runs-on: ubuntu-latest   # نظام تشغيل سحابي سريع لتشغيل الكود
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4   # سحب ملفات البوت الخاصة بك في السيرفر
-      
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" } # تجهيز بايثون 3.12 سحابياً
-        
-      - run: pip install -r requirements.txt # تثبيت المكتبات (pandas, numpy) سحابياً
-      
-      - run: python run_market.py # تشغيل البوت الحقيقي لجلب البيانات
+      - name: سحب المستودع
+        uses: actions/checkout@v4
+
+      - name: تهيئة Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: تثبيت المكتبات
+        run: pip install -r requirements.txt
+
+      - name: تشغيل المرصد
+        run: python run_market.py
         env:
-          TELEGRAM_BOT_TOKEN: ${{8884184887:AAHp5lffkbS7OgUTV4kmgU1C0qprp_uvl7g}}
-          TELEGRAM_CHAT_ID: ${{152298400}}
-          
-      - name: حفظ لقطة الأرشيف وتحديثها في المستودع
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: توليد لوحة التحكم
+        run: python reporter.py
+
+      - name: حفظ الأرشيف + الموقع
         run: |
           git config user.name "observatory-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add data/ && git commit -m "snapshot $(date -u +%F)" || echo "لا تغيير"
+          git config user.email "observatory-bot@users.noreply.github.com"
+          git add data/ docs/
+          git commit -m "observatory: $(date -u +'%F %H:%M UTC')" || echo "لا تغييرات للالتزام"
           git push || echo "تخطّي الدفع"
