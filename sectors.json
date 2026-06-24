@@ -1,0 +1,47 @@
+{
+  "_comment": "خريطة بذرة: الرمز → القطاع. الباقي يُصنَّف Other. عدّل/أضِف بحرّية.",
+  "_vocab": ["AI","RWA","L1","L2","DeFi","Meme","DePIN","Gaming","Infra","Oracle","Exchange","Privacy","Payments","Other"],
+
+  "BTC": "L1", "ETH": "L1", "SOL": "L1", "BNB": "L1", "ADA": "L1",
+  "AVAX": "L1", "TRX": "L1", "DOT": "L1", "NEAR": "L1", "APT": "L1",
+  "SUI": "L1", "SEI": "L1", "TON": "L1", "ATOM": "L1", "ALGO": "L1",
+  "HBAR": "L1", "EGLD": "L1", "INJ": "DeFi", "TIA": "L1", "KAS": "L1",
+  "ICP": "L1", "FLOW": "L1", "XTZ": "L1", "KAVA": "L1", "MINA": "L1",
+
+  "ARB": "L2", "OP": "L2", "MATIC": "L2", "POL": "L2", "STRK": "L2",
+  "MANTA": "L2", "METIS": "L2", "ZK": "L2", "IMX": "L2", "BLAST": "L2",
+
+  "LINK": "Oracle", "PYTH": "Oracle", "BAND": "Oracle", "API3": "Oracle",
+
+  "UNI": "DeFi", "AAVE": "DeFi", "MKR": "DeFi", "LDO": "DeFi", "CRV": "DeFi",
+  "SNX": "DeFi", "COMP": "DeFi", "SUSHI": "DeFi", "1INCH": "DeFi", "DYDX": "DeFi",
+  "GMX": "DeFi", "PENDLE": "DeFi", "CAKE": "DeFi", "RUNE": "DeFi", "JUP": "DeFi",
+  "ENA": "DeFi", "ETHFI": "DeFi", "RAY": "DeFi", "MORPHO": "DeFi", "AERO": "DeFi",
+
+  "TAO": "AI", "FET": "AI", "RENDER": "AI", "RNDR": "AI", "AGIX": "AI",
+  "OCEAN": "AI", "WLD": "AI", "AKT": "AI", "AI16Z": "AI", "VIRTUAL": "AI",
+  "ARKM": "AI", "GRASS": "AI", "IO": "AI", "NEAR_AI": "AI",
+
+  "ONDO": "RWA", "ENA_RWA": "RWA", "POLYX": "RWA", "OM": "RWA", "PENDLE_RWA": "RWA",
+  "CFG": "RWA", "RSR": "RWA", "TOKEN": "RWA",
+
+  "HNT": "DePIN", "IOTX": "DePIN", "AR": "DePIN", "FIL": "DePIN", "STORJ": "DePIN",
+  "THETA": "DePIN", "GRT": "Infra", "RLC": "DePIN", "AKT_DEPIN": "DePIN",
+
+  "IMX_GAME": "Gaming", "GALA": "Gaming", "SAND": "Gaming", "MANA": "Gaming",
+  "AXS": "Gaming", "APE": "Gaming", "BEAM": "Gaming", "PIXEL": "Gaming",
+  "RONIN": "Gaming", "RON": "Gaming", "ILV": "Gaming", "ENJ": "Gaming",
+
+  "DOGE": "Meme", "SHIB": "Meme", "PEPE": "Meme", "WIF": "Meme", "BONK": "Meme",
+  "FLOKI": "Meme", "BOME": "Meme", "MEME": "Meme", "POPCAT": "Meme",
+  "MEW": "Meme", "BRETT": "Meme", "TURBO": "Meme", "NEIRO": "Meme",
+
+  "XRP": "Payments", "XLM": "Payments", "LTC": "Payments", "BCH": "Payments",
+  "XMR": "Privacy", "ZEC": "Privacy", "DASH": "Privacy",
+
+  "OKB": "Exchange", "CRO": "Exchange", "KCS": "Exchange", "GT": "Exchange",
+  "BGB": "Exchange", "WBT": "Exchange",
+
+  "FTM": "Infra", "S": "Infra", "QNT": "Infra", "VET": "Infra", "ENS": "Infra",
+  "W": "Infra", "ZRO": "Infra", "CKB": "Infra", "ROSE": "Infra"
+}

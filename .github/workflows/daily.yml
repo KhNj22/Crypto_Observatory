@@ -1,0 +1,29 @@
+name: market-observatory-daily
+
+on:
+  schedule:
+    - cron: "5 4 * * *"      # يعمل الساعة 04:05 بتوقيت UTC يومياً تلقائياً
+  workflow_dispatch:         # يتيح لك زر تشغيل يدوي من موقع جيتهاب عند الحاجة
+
+jobs:
+  run:
+    runs-on: ubuntu-latest   # نظام تشغيل سحابي سريع لتشغيل الكود
+    steps:
+      - uses: actions/checkout@v4   # سحب ملفات البوت الخاصة بك في السيرفر
+      
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" } # تجهيز بايثون 3.12 سحابياً
+        
+      - run: pip install -r requirements.txt # تثبيت المكتبات (pandas, numpy) سحابياً
+      
+      - run: python run_market.py # تشغيل البوت الحقيقي لجلب البيانات
+        env:
+          TELEGRAM_BOT_TOKEN: ${{8884184887:AAHp5lffkbS7OgUTV4kmgU1C0qprp_uvl7g}}
+          TELEGRAM_CHAT_ID: ${{152298400}}
+          
+      - name: حفظ لقطة الأرشيف وتحديثها في المستودع
+        run: |
+          git config user.name "observatory-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data/ && git commit -m "snapshot $(date -u +%F)" || echo "لا تغيير"
+          git push || echo "تخطّي الدفع"

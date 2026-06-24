@@ -1,0 +1,61 @@
+# ===========================================================================
+# Crypto Observatory V1 — daily.yml
+# ضعه في:  .github/workflows/daily.yml
+#
+# تفعيل GitHub Pages (مرّة واحدة):
+#   Settings → Pages → Source: "Deploy from a branch"
+#   Branch: main  /  Folder: /docs   →  Save
+#   سيُنشر الموقع على:  https://<username>.github.io/<repo>/
+#
+# الأسرار (Settings → Secrets and variables → Actions → New repository secret):
+#   TELEGRAM_BOT_TOKEN   و   TELEGRAM_CHAT_ID
+# ===========================================================================
+name: observatory-daily
+
+on:
+  schedule:
+    - cron: "5 4 * * *"        # 04:05 UTC يومياً (عدّل حسب رغبتك)
+  workflow_dispatch:            # زر تشغيل يدوي في تبويب Actions
+
+permissions:
+  contents: write               # مطلوب للـ commit/push (الأرشيف + الموقع)
+
+concurrency:                    # نفس مجموعة weekly.yml — لا يكتبان قاعدة البيانات معاً أبداً
+  group: crypto-observatory-db
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: سحب المستودع (مع تاريخ الأرشيف)
+        uses: actions/checkout@v4
+
+      - name: تهيئة Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: تثبيت المكتبات
+        run: pip install -r requirements.txt
+
+      - name: تشغيل المرصد (Market Observatory)
+        run: python run_market.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      - name: توليد لوحة التحكم (docs/index.html)
+        run: python reporter.py
+
+      - name: حفظ الأرشيف + الموقع (persist DB + dashboard)
+        run: |
+          git config user.name  "observatory-bot"
+          git config user.email "observatory-bot@users.noreply.github.com"
+          git add data/ docs/
+          git commit -m "observatory: $(date -u +'%F %H:%M UTC')" || echo "لا تغييرات للالتزام"
+          git push || echo "تخطّي الدفع"
+
+# ملاحظة: نلتزم data/observatory.db عمداً ليتراكم تاريخ الـ NAV عبر التشغيلات.
+# (إن كبر المستودع مستقبلاً، يمكن نقل الـ DB إلى Git LFS أو تصدير لقطة CSV فقط.)

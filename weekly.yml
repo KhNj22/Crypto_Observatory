@@ -1,0 +1,57 @@
+# ===========================================================================
+# Crypto Observatory V1 — weekly.yml
+# ضعه في:  .github/workflows/weekly.yml
+#
+# يشغّل خط الأنابيب الكامل (المراحل 2 + 3 + 5) أسبوعياً وباستقلال تام:
+#   الكون الديناميكي ← القطاعات ← الترتيب ← المحفظة الورقية ← اللقطة ← اللوحة.
+# يلتقط نقطة NAV جديدة لكل ذراع كل أسبوع (Forward Test لا يفوته شيء).
+#
+# تفعيل GitHub Pages (مرّة واحدة): Settings → Pages → Deploy from a branch
+#   Branch: main  /  Folder: /docs  →  الموقع: https://<user>.github.io/<repo>/
+#
+# مهمّ: تأكّد أن data/observatory.db ليس ضمن .gitignore، وإلا لن يتراكم التاريخ
+#       (كل تشغيل سيبدأ من الصفر). الـ commit أدناه يحفظه ليستمر عبر الأسابيع.
+# ===========================================================================
+name: observatory-weekly
+
+on:
+  schedule:
+    - cron: "10 4 * * 1"        # كل اثنين 04:10 UTC (بعد اليومي مباشرةً، بلا تصادم)
+  workflow_dispatch:            # زر تشغيل يدوي في تبويب Actions
+
+permissions:
+  contents: write               # مطلوب للـ commit/push (الأرشيف + الموقع)
+
+concurrency:                    # نفس مجموعة daily.yml — لا يكتبان قاعدة البيانات معاً أبداً
+  group: crypto-observatory-db
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: سحب المستودع (مع تاريخ الأرشيف)
+        uses: actions/checkout@v4
+
+      - name: تهيئة Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: تثبيت المكتبات
+        run: pip install -r requirements.txt
+
+      - name: التشغيل الأسبوعي الكامل (المراحل 2 + 3 + 5)
+        run: python run_weekly.py          # يهيّئ الأرشيف ذاتياً ويولّد docs/index.html
+
+      - name: حفظ الأرشيف + الموقع (persist DB + dashboard)
+        run: |
+          git config user.name  "observatory-bot"
+          git config user.email "observatory-bot@users.noreply.github.com"
+          git add data/ docs/
+          git commit -m "weekly: $(date -u +'%F %H:%M UTC')" || echo "لا تغييرات للالتزام"
+          git push || echo "تخطّي الدفع"
+
+# البيانات: data-api.binance.vision (غير محجوبة) + CoinGecko + DefiLlama + alternative.me.
+# التشغيل مستقلّ تماماً؛ تابع الـ NAV على لوحتك في GitHub Pages أسبوعياً.

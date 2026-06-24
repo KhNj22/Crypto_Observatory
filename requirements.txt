@@ -1,0 +1,13 @@
+# Crypto Observatory V1 — المتطلّبات
+# تثبيت:  pip install -r requirements.txt
+
+requests>=2.31      # عملاء HTTP (Binance / DefiLlama / Telegram / F&G)
+pandas>=2.0         # معالجة السلاسل الزمنية
+numpy>=1.24         # حساب عددي
+pyarrow>=14.0       # حفظ OHLCV بصيغة Parquet (للأرشيف/الـ backtest)
+
+# اختياري (بديل Binance إن واجهت قيد وصول جغرافي):
+# ccxt>=4.0         # واجهة موحّدة لبورصات متعدّدة (Bybit/OKX/KuCoin/Kraken)
+
+# اختياري (جدولة برمجية بدل Task Scheduler):
+# APScheduler>=3.10
